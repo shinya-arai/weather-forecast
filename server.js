@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 const config = {
     channelSecret: '93c278164e54da0e42176a9d44ce4412',
-    channelAccessToken: '/UcAoPAfj7dyVPlg1xh99GFfcJNnWlV2OmtZ7dKIJG9S5Xn8tJt7uM3+e0gP7Fx7CMCoZMkYMeBKX9Jd3Pl2iqsDyuodHhU+k7kf+JW7tobITt+Oqfqpjuu8z2yBvdcXhMYD694C11b3uTRI9DLXBwdB04t89/1O/w1cDnyilFU='
+    channelAccessToken: 'pSLwVUHjSZaTE2hwoJgwnb+YceAB/JcKr95VhiXXk4FRS7DghRvZmqT2Beop+tEjCMCoZMkYMeBKX9Jd3Pl2iqsDyuodHhU+k7kf+JW7toYtJLs5XewE5ilH7MazH9R1NhnUOVwKCkXIg8hMyYKgewdB04t89/1O/w1cDnyilFU='
 };
 
 const app = express();
@@ -27,20 +27,30 @@ function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-  let replyText = '';
+  let mes = '';
 
-  if(event.message.text === 'こんにちは') {
-    replyText = 'こんばんはの時間ですよ'
+  if(event.message.text === '天気教えて') {
+    mes = 'ちょっと待ってね';
+    getNodeVer(event.source.userId)
   } else {
-    replyText = 'うざ'
+    mes = '「天気教えて」って言ってね';
   }
 
   return client.replyMessage(event.replyToken, {
     type: 'text',
-    text: replyText //実際に返信の言葉を入れる箇所
+    text: mes //実際に返信の言葉を入れる箇所
   });
 }
 
-// app.listen(PORT);
-(process.env.NOW_REGION) ? module.exports = app : app.listen(PORT);
+const getNodeVer = async (userId) => {
+  const res = await axios.get('http://weather.livedoor.com/forecast/webservice/json/v1?city=270000');
+  const item = res.data;
+
+  await client.pushMessage(userId, {
+    type: 'text',
+    text: item.description.text;
+  })
+}
+
+app.listen(PORT);
 console.log(`Server running at ${PORT}`);
